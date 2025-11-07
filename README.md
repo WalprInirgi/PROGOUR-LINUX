@@ -2,8 +2,6 @@
 
 <div align="center">
 
-![PROGOUR-LINUX](screenshots/main.png)
-
 **Comprehensive suite of 50 penetration testing tools with web and terminal interfaces**
 
 [![Linux](https://img.shields.io/badge/Linux-Compatible-brightgreen.svg)](https://www.linux.org/)
@@ -24,7 +22,7 @@
 
 ### Installation
 ```bash
-git clone https://github.com/yourusername/PROGOUR-LINUX.git
+git clone https://github.com/WalprInirgi/PROGOUR-LINUX.git
 cd PROGOUR-LINUX
 chmod +x install.sh
 ./install.sh
