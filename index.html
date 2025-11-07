@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PROGOUR-LINUX Web Interface</title>
+    <style>
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-blue: #3b82f6;
+            --light-blue: #dbeafe;
+            --dark-blue: #1e40af;
+            --terminal-bg: #0f172a;
+            --terminal-green: #10b981;
+            --terminal-yellow: #f59e0b;
+            --terminal-red: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue));
+            color: white;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            padding: 2rem 0;
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            border: 1px solid var(--secondary-blue);
+        }
+        
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 0.5rem;
+            color: var(--light-blue);
+            text-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: rgba(0,0,0,0.4);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+            border: 1px solid var(--secondary-blue);
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--light-blue);
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 20px;
+            min-height: 600px;
+        }
+        
+        .sidebar {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--secondary-blue);
+        }
+        
+        .main-content {
+            background: rgba(0,0,0,0.4);
+            border-radius: 15px;
+            padding: 1.5rem;
+            border: 1px solid var(--secondary-blue);
+        }
+        
+        .category {
+            margin-bottom: 1.5rem;
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--secondary-blue);
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid var(--secondary-blue);
+        }
+        
+        .tool-item {
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            background: rgba(59, 130, 246, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid transparent;
+        }
+        
+        .tool-item:hover {
+            background: rgba(59, 130, 246, 0.4);
+            border-color: var(--secondary-blue);
+            transform: translateX(5px);
+        }
+        
+        .tool-item.installed {
+            border-left: 4px solid var(--terminal-green);
+        }
+        
+        .tool-item.not-installed {
+            border-left: 4px solid var(--terminal-red);
+            opacity: 0.7;
+        }
+        
+        .tool-name {
+            font-weight: bold;
+            margin-bottom: 0.25rem;
+        }
+        
+        .tool-desc {
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        
+        .tool-status {
+            font-size: 0.7rem;
+            margin-top: 0.25rem;
+        }
+        
+        .status-installed {
+            color: var(--terminal-green);
+        }
+        
+        .status-missing {
+            color: var(--terminal-red);
+        }
+        
+        .terminal {
+            background: var(--terminal-bg);
+            border-radius: 10px;
+            padding: 1rem;
+            font-family: 'Courier New', monospace;
+            height: 400px;
+            overflow-y: auto;
+            color: var(--terminal-green);
+            border: 1px solid #374151;
+        }
+        
+        .terminal-line {
+            margin-bottom: 0.25rem;
+            word-wrap: break-word;
+        }
+        
+        .terminal-command {
+            color: var(--light-blue);
+        }
+        
+        .terminal-output {
+            color: var(--terminal-green);
+        }
+        
+        .terminal-error {
+            color: var(--terminal-red);
+        }
+        
+        .command-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: #1f2937;
+            border: 1px solid var(--secondary-blue);
+            border-radius: 8px;
+            color: white;
+            font-family: 'Courier New', monospace;
+            margin-top: 1rem;
+        }
+        
+        .btn {
+            background: var(--secondary-blue);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+            margin-top: 0.5rem;
+        }
+        
+        .btn:hover {
+            background: var(--dark-blue);
+        }
+        
+        .btn:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .btn-install {
+            background: var(--terminal-green);
+            margin-left: 0.5rem;
+        }
+        
+        .btn-install:hover {
+            background: #059669;
+        }
+        
+        .loading {
+            color: var(--terminal-yellow);
+            font-style: italic;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>PROGOUR-LINUX</h1>
+            <p>50 Penetration Testing Tools - Web Interface</p>
+            <div class="stats" id="stats">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-tools">50</div>
+                    <div>Total Tools</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="installed-tools">0</div>
+                    <div>Installed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="system-status">Online</div>
+                    <div>System Status</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="grid">
+            <div class="sidebar" id="sidebar">
+                <h3 style="margin-bottom: 1rem;">Tools Categories</h3>
+                <div id="categories-list">
+                    <div class="loading">Loading tools...</div>
+                </div>
+            </div>
+            
+            <div class="main-content">
+                <h3 style="margin-bottom: 1rem;">Terminal Output</h3>
+                <div class="terminal" id="terminal">
+                    <div class="terminal-line">PROGOUR-LINUX Web Interface Ready</div>
+                    <div class="terminal-line">System initialized successfully</div>
+                    <div class="terminal-line">Select a tool from the sidebar to get started</div>
+                </div>
+                
+                <div>
+                    <input type="text" class="command-input" id="commandInput" 
+                           placeholder="Enter custom command or modify the tool command...">
+                    <button class="btn" onclick="executeCommand()">
+                        Execute Command
+                    </button>
+                    <button class="btn btn-install" onclick="installCurrentTool()" id="installBtn" style="display: none;">
+                        Install Tool
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTool = null;
+        let toolsData = null;
+        
+        // Initialize when page loads
+        window.addEventListener('DOMContentLoaded', function() {
+            loadTools();
+            loadSystemInfo();
+            setInterval(loadSystemInfo, 30000); // Update every 30 seconds
+        });
+        
+        // Load tools from API
+        async function loadTools() {
+            try {
+                showLoading('Loading tools...');
+                const response = await fetch('/api/tools');
+                toolsData = await response.json();
+                displayCategories(toolsData.categories);
+                updateStats();
+            } catch (error) {
+                addToTerminal(`Error loading tools: ${error.message}`, 'error');
+            }
+        }
+        
+        // Display categories and tools
+        function displayCategories(categories) {
+            const container = document.getElementById('categories-list');
+            container.innerHTML = '';
+            
+            categories.forEach(category => {
+                const categoryDiv = document.createElement('div');
+                categoryDiv.className = 'category';
+                
+                categoryDiv.innerHTML = `
+                    <div class="category-header">
+                        <span>${category.icon}</span>
+                        <h4>${category.name}</h4>
+                    </div>
+                    <div id="tools-${category.name.replace(/\s+/g, '-')}"></div>
+                `;
+                
+                container.appendChild(categoryDiv);
+                displayTools(category.name, category.tools);
+            });
+        }
+        
+        // Display tools in category
+        function displayTools(categoryName, tools) {
+            const container = document.getElementById(`tools-${categoryName.replace(/\s+/g, '-')}`);
+            
+            tools.forEach(tool => {
+                const toolDiv = document.createElement('div');
+                const statusClass = tool.installed ? 'installed' : 'not-installed';
+                const statusText = tool.installed ? 'Installed' : 'Not Installed';
+                const statusColor = tool.installed ? 'status-installed' : 'status-missing';
+                
+                toolDiv.className = `tool-item ${statusClass}`;
+                toolDiv.innerHTML = `
+                    <div class="tool-name">${tool.name}</div>
+                    <div class="tool-desc">${tool.description}</div>
+                    <div class="tool-status ${statusColor}">${statusText}</div>
+                `;
+                
+                toolDiv.addEventListener('click', () => selectTool(tool));
+                container.appendChild(toolDiv);
+            });
+        }
+        
+        // Select a tool
+        function selectTool(tool) {
+            currentTool = tool;
+            document.getElementById('commandInput').placeholder = `Command for ${tool.name}...`;
+            document.getElementById('commandInput').value = tool.command;
+            
+            // Show/hide install button
+            const installBtn = document.getElementById('installBtn');
+            installBtn.style.display = tool.installed ? 'none' : 'inline-block';
+            
+            addToTerminal(`Selected tool: ${tool.name}`, 'command');
+            addToTerminal(`Description: ${tool.description}`);
+            addToTerminal(`Status: ${tool.installed ? 'Installed' : 'Not installed'}`);
+            addToTerminal(`Default command: ${tool.command}`);
+            addToTerminal('Modify the command above or click Execute to run');
+        }
+        
+        // Execute command
+        async function executeCommand() {
+            const commandInput = document.getElementById('commandInput');
+            const command = commandInput.value.trim();
+            
+            if (!command) {
+                addToTerminal('Error: Please enter a command', 'error');
+                return;
+            }
+            
+            addToTerminal(`> ${command}`, 'command');
+            
+            try {
+                const response = await fetch('/api/execute', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `command=${encodeURIComponent(command)}&tool_id=${currentTool ? currentTool.id : ''}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    addToTerminal(result.output);
+                } else {
+                    addToTerminal(`Error: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addToTerminal(`Network error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Install current tool
+        async function installCurrentTool() {
+            if (!currentTool) {
+                addToTerminal('Error: No tool selected', 'error');
+                return;
+            }
+            
+            addToTerminal(`Installing ${currentTool.name}...`, 'command');
+            
+            try {
+                const response = await fetch('/api/install', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `tool_name=${encodeURIComponent(currentTool.name)}`
+                });
+                
+                const result = await response.json();
+                
+                if (result.status === 'success') {
+                    addToTerminal(`Installation completed: ${result.message}`);
+                    addToTerminal(result.output);
+                    // Reload tools to update status
+                    loadTools();
+                } else {
+                    addToTerminal(`Installation failed: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                addToTerminal(`Installation error: ${error.message}`, 'error');
+            }
+        }
+        
+        // Load system information
+        async function loadSystemInfo() {
+            try {
+                const response = await fetch('/api/system');
+                const info = await response.json();
+                
+                document.getElementById('system-status').textContent = 'Online';
+                if (info.installed_tools !== undefined) {
+                    document.getElementById('installed-tools').textContent = info.installed_tools;
+                }
+            } catch (error) {
+                document.getElementById('system-status').textContent = 'Offline';
+            }
+        }
+        
+        // Update statistics
+        function updateStats() {
+            if (!toolsData) return;
+            
+            let installedCount = 0;
+            let totalCount = 0;
+            
+            toolsData.categories.forEach(category => {
+                category.tools.forEach(tool => {
+                    totalCount++;
+                    if (tool.installed) installedCount++;
+                });
+            });
+            
+            document.getElementById('installed-tools').textContent = installedCount;
+            document.getElementById('total-tools').textContent = totalCount;
+        }
+        
+        // Add text to terminal
+        function addToTerminal(text, type = 'output') {
+            const terminal = document.getElementById('terminal');
+            const line = document.createElement('div');
+            line.className = `terminal-line terminal-${type}`;
+            line.textContent = text;
+            terminal.appendChild(line);
+            terminal.scrollTop = terminal.scrollHeight;
+        }
+        
+        // Show loading message
+        function showLoading(message) {
+            const terminal = document.getElementById('terminal');
+            terminal.innerHTML = `<div class="terminal-line loading">${message}</div>`;
+        }
+        
+        // Allow pressing Enter to execute command
+        document.getElementById('commandInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                executeCommand();
+            }
+        });
+    </script>
+</body>
+</html>
